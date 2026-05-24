@@ -14,6 +14,25 @@ import datetime
 import os
 import nltk
 
+# Load Streamlit Cloud secrets into the environment before config/database init
+_SECRET_KEYS = (
+    'DB_TYPE', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME',
+    'JOOBLE_API_KEY', 'ADZUNA_APP_ID', 'ADZUNA_API_KEY', 'ADZUNA_COUNTRY',
+    'OLLAMA_HOST', 'OLLAMA_MODEL', 'CA_CERT_PATH',
+)
+
+
+def _hydrate_streamlit_secrets():
+    try:
+        for key in _SECRET_KEYS:
+            if key in st.secrets:
+                os.environ.setdefault(key, str(st.secrets[key]))
+    except Exception:
+        pass
+
+
+_hydrate_streamlit_secrets()
+
 # Import custom modules
 from config import Config
 from database import DatabaseManager
@@ -507,6 +526,61 @@ def main():
     activities = ["User", "Admin"]
     choice = st.sidebar.selectbox("Choose among the given options:", activities)
     
+    st.sidebar.markdown("---")
+    with st.sidebar.expander("🔌 Database Settings", expanded=True if not db_manager.connection else False):
+        # Display Connection Status
+        if db_manager.connection:
+            if db_manager.db_type == 'sqlite':
+                st.markdown("Status: **🟡 Connected (SQLite)**")
+            else:
+                st.markdown("Status: **🟢 Connected (MySQL)**")
+        else:
+            st.markdown("Status: **🔴 Disconnected**")
+            
+        # Select Database Type
+        current_db_type = db_manager.db_type.upper() if db_manager.db_type else "MYSQL"
+        db_type = st.selectbox("Database Type", ["SQLite", "MySQL"], index=0 if current_db_type == "SQLITE" else 1)
+        
+        if db_type == "SQLite":
+            db_name = st.text_input("Database Name", value=Config.DB_CONFIG.get('database') or 'cv')
+            if st.button("Save & Connect SQLite"):
+                with st.spinner("Connecting to SQLite..."):
+                    success, msg = db_manager.connect_with_credentials(
+                        db_type="sqlite",
+                        database=db_name
+                    )
+                    if success:
+                        st.success(msg)
+                        st.toast("Connected to SQLite!")
+                        time.sleep(1)
+                        st.rerun()
+                    else:
+                        st.error(f"Failed to connect: {msg}")
+        else: # MySQL
+            db_host = st.text_input("Host", value=Config.DB_CONFIG.get('host') or 'localhost')
+            db_port = st.number_input("Port", value=int(Config.DB_CONFIG.get('port') or 3306), step=1)
+            db_user = st.text_input("User", value=Config.DB_CONFIG.get('user') or 'root')
+            db_pass = st.text_input("Password", value=Config.DB_CONFIG.get('password') or '', type="password")
+            db_name = st.text_input("Database Name", value=Config.DB_CONFIG.get('database') or 'cv')
+            
+            if st.button("Save & Connect MySQL"):
+                with st.spinner("Connecting to MySQL..."):
+                    success, msg = db_manager.connect_with_credentials(
+                        db_type="mysql",
+                        host=db_host,
+                        port=db_port,
+                        user=db_user,
+                        password=db_pass,
+                        database=db_name
+                    )
+                    if success:
+                        st.success(msg)
+                        st.toast("Connected to MySQL!")
+                        time.sleep(1)
+                        st.rerun()
+                    else:
+                        st.error(f"Failed to connect: {msg}")
+                        
     st.sidebar.markdown("""
         <p style='text-align: center; font-size: 12px;'>
             © Developed by 

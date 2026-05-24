@@ -1,26 +1,14 @@
 # Core dependencies
 numpy==1.26.0
 pandas==2.2.0
-scikit-learn==1.4.0
-scipy==1.11.0
-
-# PyTorch (CPU version)
-torch==2.1.0
-torchvision==0.16.0
-torchaudio==2.1.0
 
 # NLP
 nltk==3.8.1
 spacy==3.7.4
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz
-sentence-transformers==2.5.1
-transformers==4.36.2
 
 # Web & API
 streamlit==1.32.0
-fastapi==0.110.0
-uvicorn==0.27.0
-python-multipart==0.0.9
 requests==2.31.0
 beautifulsoup4==4.12.2
 lxml==5.1.0

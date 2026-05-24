@@ -1,6 +1,7 @@
 # Environment Variables
 .env
 .env.local
+.streamlit/secrets.toml
 
 # Python Cache
 __pycache__/

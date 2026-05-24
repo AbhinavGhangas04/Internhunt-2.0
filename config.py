@@ -6,6 +6,17 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+
+def default_db_type() -> str:
+    """Prefer SQLite when MySQL credentials are not configured (e.g. Streamlit Cloud)."""
+    explicit = os.getenv('DB_TYPE')
+    if explicit:
+        return explicit.lower()
+    if os.getenv('DB_PASSWORD') or os.getenv('DB_HOST'):
+        return 'mysql'
+    return 'sqlite'
+
+
 class Config:
     """Application configuration class"""
     
@@ -30,7 +41,7 @@ class Config:
 
     # Application Settings
     APP_TITLE = "InternHunt - Your Internship Finder"
-    APP_ICON = 'Logo/InternHunt_logo.png'
+    APP_ICON = '🎯'
     UPLOAD_DIR = './Uploaded_Resumes/'
 
     # Skill matching settings
@@ -48,10 +59,11 @@ class Config:
     def validate_config(cls) -> Dict[str, Any]:
         """Validate configuration and return status"""
         issues = []
-        
-        if not cls.DB_CONFIG['password']:
-            issues.append("Database password not set")
-        
+        db_type = default_db_type()
+
+        if db_type == 'mysql' and not cls.DB_CONFIG['password']:
+            issues.append("Database password not set (required for MySQL)")
+
         if not os.path.exists(cls.UPLOAD_DIR):
             try:
                 os.makedirs(cls.UPLOAD_DIR, exist_ok=True)
