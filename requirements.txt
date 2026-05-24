@@ -28,4 +28,4 @@ watchdog==3.0.0
 pillow==10.0.0
 
 # Text processing
-fuzzywuzzy==0.18.0
+thefuzz==0.22.1
