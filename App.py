@@ -93,6 +93,20 @@ def initialize_app():
         .msg-user {background: rgba(56,68,255,0.18); border: 1px solid rgba(56,68,255,0.35);} 
         .msg-assist {background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);} 
         .msg-role {font-size: 11px; opacity: 0.7; margin-bottom: 4px;}
+        .stButton > button,
+        div[data-testid="stButton"] > button,
+        section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
+            background-color: #3b82f6 !important;
+            color: #ffffff !important;
+            border: 1px solid #2563eb !important;
+            border-radius: 8px !important;
+        }
+        .stButton > button:hover,
+        div[data-testid="stButton"] > button:hover,
+        section[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -521,72 +535,14 @@ def main():
     initialize_app()
     display_header()
     
-    # Sidebar
-    st.sidebar.markdown("# Choose User")
-    activities = ["User", "Admin"]
-    choice = st.sidebar.selectbox("Choose among the given options:", activities)
-    
+    # Public deployment mode: always user flow
+    choice = "User"
     st.sidebar.markdown("---")
-    with st.sidebar.expander("🔌 Database Settings", expanded=True if not db_manager.connection else False):
-        # Display Connection Status
-        if db_manager.connection:
-            if db_manager.db_type == 'sqlite':
-                st.markdown("Status: **🟡 Connected (SQLite)**")
-            else:
-                st.markdown("Status: **🟢 Connected (MySQL)**")
-        else:
-            st.markdown("Status: **🔴 Disconnected**")
-            
-        # Select Database Type
-        current_db_type = db_manager.db_type.upper() if db_manager.db_type else "MYSQL"
-        db_type = st.selectbox("Database Type", ["SQLite", "MySQL"], index=0 if current_db_type == "SQLITE" else 1)
-        
-        if db_type == "SQLite":
-            db_name = st.text_input("Database Name", value=Config.DB_CONFIG.get('database') or 'cv')
-            if st.button("Save & Connect SQLite"):
-                with st.spinner("Connecting to SQLite..."):
-                    success, msg = db_manager.connect_with_credentials(
-                        db_type="sqlite",
-                        database=db_name
-                    )
-                    if success:
-                        st.success(msg)
-                        st.toast("Connected to SQLite!")
-                        time.sleep(1)
-                        st.rerun()
-                    else:
-                        st.error(f"Failed to connect: {msg}")
-        else: # MySQL
-            db_host = st.text_input("Host", value=Config.DB_CONFIG.get('host') or 'localhost')
-            db_port = st.number_input("Port", value=int(Config.DB_CONFIG.get('port') or 3306), step=1)
-            db_user = st.text_input("User", value=Config.DB_CONFIG.get('user') or 'root')
-            db_pass = st.text_input("Password", value=Config.DB_CONFIG.get('password') or '', type="password")
-            db_name = st.text_input("Database Name", value=Config.DB_CONFIG.get('database') or 'cv')
-            
-            if st.button("Save & Connect MySQL"):
-                with st.spinner("Connecting to MySQL..."):
-                    success, msg = db_manager.connect_with_credentials(
-                        db_type="mysql",
-                        host=db_host,
-                        port=db_port,
-                        user=db_user,
-                        password=db_pass,
-                        database=db_name
-                    )
-                    if success:
-                        st.success(msg)
-                        st.toast("Connected to MySQL!")
-                        time.sleep(1)
-                        st.rerun()
-                    else:
-                        st.error(f"Failed to connect: {msg}")
                         
     st.sidebar.markdown("""
         <p style='text-align: center; font-size: 12px;'>
-            © Developed by 
-            <a href='https://www.linkedin.com/in/shubham-sharma-163a962a9' target='_blank'>Shubham</a>, 
-            <a href='https://www.linkedin.com/in/abhinav-ghangas-5a3b8128a' target='_blank'>Abhinav</a>, 
-            <a href='https://www.linkedin.com/in/pragya-9974b1298' target='_blank'>Pragya</a>
+            © Developed by
+            <a href='https://www.linkedin.com/in/abhinav-ghangas-5a3b8128a' target='_blank'>Abhinav</a>
         </p>
     """, unsafe_allow_html=True)
     
