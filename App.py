@@ -107,6 +107,31 @@ def initialize_app():
             background-color: #2563eb !important;
             color: #ffffff !important;
         }
+        div[data-baseweb="select"] > div {
+            background-color: #111827 !important;
+            color: #ffffff !important;
+            border-color: #374151 !important;
+        }
+        div[data-baseweb="popover"] ul {
+            background-color: #111827 !important;
+            color: #ffffff !important;
+        }
+        div[data-baseweb="popover"] li {
+            background-color: #111827 !important;
+            color: #ffffff !important;
+        }
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stNumberInput"] input,
+        div[data-testid="stTextArea"] textarea {
+            background-color: #111827 !important;
+            color: #ffffff !important;
+            border: 1px solid #374151 !important;
+        }
+        div[data-testid="stTextInput"] label,
+        div[data-testid="stNumberInput"] label,
+        div[data-testid="stSelectbox"] label {
+            color: #d1d5db !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -535,8 +560,9 @@ def main():
     initialize_app()
     display_header()
     
-    # Public deployment mode: always user flow
-    choice = "User"
+    # Sidebar role selector
+    st.sidebar.markdown("# Choose Mode")
+    choice = st.sidebar.selectbox("Select access:", ["User", "Admin"])
     st.sidebar.markdown("---")
                         
     st.sidebar.markdown("""
@@ -866,7 +892,7 @@ def main():
                 st.error("Could not parse the resume. Please ensure it's a valid PDF with text content.")
     
     elif choice == 'Admin':
-        st.subheader(" Admin Dashboard")
+        st.subheader("Admin Dashboard")
         
         # Display user data
         user_data = db_manager.get_user_data(50)
@@ -875,11 +901,15 @@ def main():
                 'ID', 'Name', 'Email', 'Resume Score', 'Timestamp', 'Pages',
                 'Predicted Field', 'User Level', 'Skills', 'Recommended Skills', 'Courses'
             ])
-            st.dataframe(df)
+            st.metric("Total resumes extracted", int(len(df)))
+
+            basic_df = df[['Name', 'Email', 'Resume Score', 'Timestamp']].copy()
+            st.markdown("### Basic details")
+            st.dataframe(basic_df, use_container_width=True)
             
             # Download link
             st.markdown(
-                get_table_download_link(df, "user_data.csv", " Download Data as CSV"),
+                get_table_download_link(basic_df, "resume_basic_details.csv", "Download basic details as CSV"),
                 unsafe_allow_html=True
             )
         else:
