@@ -29,4 +29,4 @@ pillow==10.0.0
 
 # Text processing
 fuzzywuzzy==0.18.0
-python-Levenshtein==0.12.2
+python-Levenshtein
